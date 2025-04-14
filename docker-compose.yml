@@ -1,0 +1,19 @@
+services:
+  app:
+    image: nginx:latest
+    ports:
+      - "80:80"
+    deploy:
+      replicas: 3
+      update_config:
+        parallelism: 1
+        delay: 10s
+    volumes:
+      - ./html:/usr/share/nginx/html
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    name: app-network-v2
+    driver: overlay
