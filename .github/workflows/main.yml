@@ -29,6 +29,7 @@ jobs:
 
      - name: Deploy to Docker Swarm
        uses: appleboy/ssh-action@v1.0.3
+       continue-on-error: true
        with:
          host: ${{ secrets.SWARM_HOST }}
          username: user
