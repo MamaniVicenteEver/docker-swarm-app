@@ -17,7 +17,7 @@ jobs:
 
 
      - name: Build Docker image
-       run: docker build -t my-app:latest .
+       run: docker build -t ${{ secrets.DOCKER_USERNAME }}/my-app:latest .
 
 
      - name: Log in to Docker Hub
@@ -25,8 +25,7 @@ jobs:
 
 
      - name: Push Docker image
-       run: docker push my-app:latest
-
+       run: docker push ${{ secrets.DOCKER_USERNAME }}/my-app:latest
 
      - name: Deploy to Docker Swarm
        uses: appleboy/ssh-action@v1.0.3
