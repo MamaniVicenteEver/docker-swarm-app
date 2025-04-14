@@ -34,4 +34,6 @@ jobs:
          username: user
          key: ${{ secrets.SWARM_SSH_KEY }}
          script: |
-           docker service update --image secrets.DOCKER_USERNAME/my-app:latest my-app_app
+           echo "Deploying image: ${{ secrets.DOCKER_USERNAME }}/my-app:latest"
+           docker service update --image ${{ secrets.DOCKER_USERNAME }}/my-app:latest my-app_app
+     
