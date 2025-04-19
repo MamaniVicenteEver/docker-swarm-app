@@ -3,7 +3,7 @@ body, html, #app {
   margin: 0;
   width: 100%;
   height: 100%;
-  background: radial-gradient(circle, rgba(34, 193, 195, 1) 0%, rgba(0, 0, 0, 0.7) 200%);
+  background: radial-gradient(circle, rgb(0 0 0) 0%, rgb(0 0 0 / 70%) 200%);
 }
 
 #app {
@@ -50,6 +50,8 @@ h2 {
 
 /* WebGL Canvas */
 #webgl-canvas {
+  background-color: #7c14a9;
+  color: #ffffff;
   position: fixed;
   top: 0;
   right: 0;

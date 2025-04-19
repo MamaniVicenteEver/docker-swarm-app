@@ -4,9 +4,10 @@ import Spheres2Background from 'https://cdn.jsdelivr.net/npm/threejs-components@
 // Inicializar el fondo animado
 const bg = Spheres2Background(document.getElementById('webgl-canvas'), {
   count: 200,
-  colors: [0x00bcd4, 0xffffff, 0x4caf50], // Azul (Docker), Blanco, Verde (CI/CD)
+  colors: [0x00bcd4, 0xffffff, 0x4caf50], // Colores de las esferas
   minSize: 0.5,
-  maxSize: 1.5
+  maxSize: 1.5,
+  backgroundColor: 0x000000 // ⬅️ Fondo negro (nuevo parámetro)
 });
 
 // Botón de Simular Actualización
