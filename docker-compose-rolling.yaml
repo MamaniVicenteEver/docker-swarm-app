@@ -1,0 +1,19 @@
+services:
+  app:
+    image: app-my-nginx:latest
+    ports:
+      - "80:80"
+    deploy:
+      replicas: 3
+      update_config:
+        parallelism: 1
+        delay: 15s
+        failure_action: rollback
+      restart_policy:
+        condition: on-failure
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: overlay

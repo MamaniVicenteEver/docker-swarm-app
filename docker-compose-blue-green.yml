@@ -1,0 +1,46 @@
+services:
+  traefik:
+    image: traefik:v2.10
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.swarmMode=true"
+      - "--providers.docker.network=app-network"
+      - "--entrypoints.web.address=:80"
+    ports:
+      - "80:80"
+      - "8080:8080"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    networks:
+      - app-network
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+
+  blue:
+    image: app-my-nginx:latest
+    networks:
+      - app-network
+    deploy:
+      replicas: 2
+      labels:
+        - "traefik.enable=false"
+
+  green:
+    image: app-my-nginx:latest
+    networks:
+      - app-network
+    deploy:
+      replicas: 2
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.green.rule=PathPrefix(`/`)"
+        - "traefik.http.routers.green.entrypoints=web"
+        - "traefik.http.services.green.loadbalancer.server.port=80"
+
+networks:
+  app-network:
+    driver: overlay
