@@ -1,6 +1,6 @@
 # Proyecto: CI/CD con Docker Swarm
 
-Este proyecto implementa una aplicación contenerizada utilizando Docker Swarm, Docker Compose y un pipeline de CI/CD. Además, se aplican estrategias de despliegue como Rolling Updates y Blue-Green Deployment para garantizar alta disponibilidad y resiliencia.
+Este proyecto implementa una aplicación contenerizada utilizando **Docker Swarm**, **Docker Compose** y un pipeline de **CI/CD**. Además, se aplican estrategias de despliegue como **Rolling Updates** y **Blue-Green Deployment** para garantizar alta disponibilidad, resiliencia y cero tiempo de inactividad durante las actualizaciones.
 
 ---
 
@@ -12,6 +12,8 @@ Este proyecto implementa una aplicación contenerizada utilizando Docker Swarm, 
 4. [Despliegue de la Aplicación](#despliegue-de-la-aplicación)
 5. [Pipeline CI/CD](#pipeline-cicd)
 6. [Estrategias de Despliegue](#estrategias-de-despliegue)
+   - [Rolling Updates](#rolling-updates)
+   - [Blue-Green Deployment](#blue-green-deployment)
 7. [Capturas de Pantalla](#capturas-de-pantalla)
 8. [Problemas y Soluciones](#problemas-y-soluciones)
 
@@ -19,7 +21,7 @@ Este proyecto implementa una aplicación contenerizada utilizando Docker Swarm, 
 
 ## **Descripción del Proyecto**
 
-El objetivo de este proyecto es demostrar cómo integrar herramientas modernas de DevOps, como Docker Swarm y GitHub Actions, para crear un sistema de despliegue continuo. La aplicación utiliza una interfaz visual animada que simula nodos en un clúster de Docker Swarm y permite interactuar con estrategias de despliegue como Rolling Updates y Blue-Green Deployment.
+El objetivo de este proyecto es demostrar cómo integrar herramientas modernas de DevOps, como **Docker Swarm** y **GitHub Actions**, para crear un sistema de despliegue continuo. La aplicación utiliza una interfaz visual animada que simula nodos en un clúster de Docker Swarm y permite interactuar con estrategias de despliegue como **Rolling Updates** y **Blue-Green Deployment**.
 
 ---
 
@@ -29,14 +31,17 @@ La estructura del repositorio está organizada de la siguiente manera:
 
 ```
 .
-├── docker-compose.yml       # Archivo para definir servicios y redes en Docker Swarm
-├── Dockerfile               # Archivo para construir la imagen Docker
-├── html                     # Carpeta con los archivos de la aplicación web
-│   ├── docker-logo.png      # Logotipo de Docker
-│   ├── index.html           # Página principal de la aplicación
-│   ├── script.js            # Lógica interactiva de la aplicación
-│   └── styles.css           # Estilos CSS para la aplicación
-└── README.md                # Documentación del proyecto
+├── docker-compose.yml                # Configuración base para Docker Swarm
+├── docker-compose-rolling.yaml       # Configuración para Rolling Updates
+├── docker-compose-blue-green.yml     # Configuración para Blue-Green Deployment
+├── Dockerfile                        # Archivo para construir la imagen Docker
+├── html                              # Carpeta con los archivos de la aplicación web
+│   ├── docker-logo.png               # Logotipo de Docker
+│   ├── index.html                    # Página principal de la aplicación
+│   ├── script.js                     # Lógica interactiva de la aplicación
+│   └── styles.css                    # Estilos CSS para la aplicación
+├── img                               # Capturas de pantalla y recursos visuales
+└── README.md                         # Documentación del proyecto
 ```
 
 ---
@@ -44,7 +49,6 @@ La estructura del repositorio está organizada de la siguiente manera:
 ## **Configuración del Entorno**
 
 ### **Requisitos Previos**
-- Sistema operativo: Linux (Ubuntu recomendado).
 - Docker y Docker Compose instalados.
 - Git instalado.
 - Cuenta en GitHub para configurar el pipeline CI/CD.
@@ -91,8 +95,7 @@ http://192.168.1.64/
 
 ## **Pipeline CI/CD**
 
-### **Configuración del Pipeline**
-El pipeline CI/CD está configurado en GitHub Actions. El archivo `.github/workflows/ci-cd.yml` contiene las siguientes etapas:
+El pipeline CI/CD está configurado en **GitHub Actions**. El archivo `.github/workflows/ci-cd.yml` contiene las siguientes etapas:
 
 1. **Checkout del Código**: Descarga el código del repositorio.
 2. **Construcción de la Imagen**: Construye la imagen Docker de la aplicación.
@@ -109,14 +112,46 @@ Agrega los siguientes secretos en la configuración de GitHub:
 ## **Estrategias de Despliegue**
 
 ### **Rolling Updates**
-Simula una actualización gradual de los nodos en el clúster:
-1. Haz clic en el botón "Simular Actualización" en la aplicación.
-2. Observa cómo los colores de las esferas cambian gradualmente, representando la actualización de los nodos.
+La estrategia de **Rolling Updates** permite actualizar el servicio de forma gradual, minimizando el impacto en los usuarios. Las réplicas se actualizan una por una con un retraso entre cada actualización.
+
+#### **Configuración**
+El archivo `docker-compose-rolling.yaml` define la estrategia:
+```yaml
+update_config:
+  parallelism: 1  
+  delay: 15s     
+  failure_action: rollback
+```
+
+#### **Simulación**
+Para simular una actualización:
+```bash
+docker service update --image app-my-nginx:v2 my-rolling-app_app
+```
 
 ### **Blue-Green Deployment**
-Cambia entre dos versiones de la aplicación:
-1. Haz clic en el botón "Cambiar Versión".
-2. Observa cómo los colores de las esferas cambian completamente, representando el cambio entre las versiones Blue y Green.
+La estrategia de **Blue-Green Deployment** permite cambiar entre dos versiones de la aplicación sin interrupción. Una versión (`blue`) está activa mientras la otra (`green`) permanece inactiva.
+
+#### **Configuración**
+El archivo `docker-compose-blue-green.yml` define dos servicios:
+```yaml
+blue:
+  image: app-my-nginx:latest
+  labels:
+    - "traefik.enable=false"  # Inicialmente desactivado
+
+green:
+  image: app-my-nginx:latest
+  labels:
+    - "traefik.enable=true"  # Inicialmente activo
+```
+
+#### **Cambiar Versión**
+Para cambiar de `green` a `blue`:
+```bash
+docker service update --label-add "traefik.enable=true" my-bg-app_blue
+docker service update --label-add "traefik.enable=false" my-bg-app_green
+```
 
 ---
 
@@ -127,7 +162,7 @@ Cambia entre dos versiones de la aplicación:
 *Interfaz principal de la aplicación con animaciones y botones interactivos.*
 
 ### **Pipeline CI/CD**
-![Pipeline CI/CD](./img//github.png)  
+![Pipeline CI/CD](./img/github.png)  
 *Pipeline CI/CD en GitHub Actions mostrando las etapas completadas.*
 
 ### **Redes en Docker Swarm**
@@ -136,6 +171,15 @@ Cambia entre dos versiones de la aplicación:
 
 ---
 
+## **Problemas y Soluciones**
+
+Durante el desarrollo del proyecto, se encontraron algunos problemas comunes:
+
+1. **Error 404 en Traefik**: Se debió a reglas de enrutamiento incorrectas. Se solucionó asegurando que solo un servicio estuviera activo (`traefik.enable=true`).
+2. **Conflictos de Red**: Se resolvieron asegurando que todos los servicios compartieran la misma red overlay (`app-network`).
+
+---
+
 ## **Conclusión**
 
-Este proyecto demuestra cómo integrar herramientas modernas de DevOps para crear un sistema de despliegue continuo. La aplicación visualiza conceptos clave como Docker Swarm, CI/CD y estrategias de despliegue, haciendo que el aprendizaje sea interactivo y práctico.
+Este proyecto demuestra cómo integrar herramientas modernas de DevOps para crear un sistema de despliegue continuo. La aplicación visualiza conceptos clave como Docker Swarm, CI/CD y estrategias de despliegue, haciendo que el aprendizaje sea interactivo y práctico. Las estrategias de **Rolling Updates** y **Blue-Green Deployment** garantizan alta disponibilidad y permiten cambios seguros en producción.
